@@ -21,11 +21,11 @@ import {
 } from 'lucide-react';
 
 export const Calculator: React.FC = () => {
-  // Input states
-  const [frameInches, setFrameInches] = useState<string>('48');
-  const [frameSoot, setFrameSoot] = useState<string>('0');
-  const [rodMm, setRodMm] = useState<string>('19'); // 19mm (~3/4")
-  const [gapNeededInches, setGapNeededInches] = useState<string>('4');
+  // Input states initialized as empty string with ghost placeholder '0'
+  const [frameInches, setFrameInches] = useState<string>('');
+  const [frameSoot, setFrameSoot] = useState<string>('');
+  const [rodMm, setRodMm] = useState<string>('');
+  const [gapNeededInches, setGapNeededInches] = useState<string>('');
   const [gapCanBeMore, setGapCanBeMore] = useState<boolean>(true);
   const [manualRodOverride, setManualRodOverride] = useState<number | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
@@ -44,19 +44,19 @@ export const Calculator: React.FC = () => {
   }, [frameInches, frameSoot, rodMm, gapNeededInches, gapCanBeMore, manualRodOverride]);
 
   const handleReset = () => {
-    setFrameInches('48');
-    setFrameSoot('0');
-    setRodMm('19');
-    setGapNeededInches('4');
+    setFrameInches('');
+    setFrameSoot('');
+    setRodMm('');
+    setGapNeededInches('');
     setGapCanBeMore(true);
     setManualRodOverride(null);
   };
 
   const handleCopySummary = () => {
     const text = `--- GRILL & GATE GAP SPECIFICATION ---\n` +
-      `Frame Internal Width: ${calculationResult.frameTotalInches} in (${frameInches} in ${frameSoot} soot / ${calculationResult.frameTotalMm} mm)\n` +
+      `Frame Internal Width: ${calculationResult.frameTotalInches} in (${frameInches || '0'} in ${frameSoot || '0'} soot / ${calculationResult.frameTotalMm} mm)\n` +
       `Filler Pipe/Rod Width: ${calculationResult.rodMm} mm\n` +
-      `Target Gap: ${gapNeededInches} in\n\n` +
+      `Target Gap: ${gapNeededInches || '0'} in\n\n` +
       `=== RESULTS ===\n` +
       `✓ ${calculationResult.summaryRodsText}\n` +
       `✓ ${calculationResult.summaryGapText} (${calculationResult.gapMm} mm)\n` +
@@ -79,6 +79,8 @@ export const Calculator: React.FC = () => {
   ];
 
   const standardGapSizes = ['3', '3.5', '4', '4.5', '5', '6'];
+
+  const numGapNeeded = parseFloat(gapNeededInches) || 0;
 
   return (
     <div className="space-y-8 pb-16">
@@ -150,7 +152,7 @@ export const Calculator: React.FC = () => {
                   1. Frame Internal Width
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  {frameInches} in {frameSoot} soot ({calculationResult.frameTotalMm} mm)
+                  {frameInches || '0'} in {frameSoot || '0'} soot ({calculationResult.frameTotalMm} mm)
                 </span>
               </div>
 
@@ -163,13 +165,13 @@ export const Calculator: React.FC = () => {
                       type="number"
                       min="0"
                       step="1"
+                      placeholder="0"
                       value={frameInches}
                       onChange={(e) => {
                         setFrameInches(e.target.value);
                         setManualRodOverride(null);
                       }}
-                      className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                      placeholder="e.g. 48"
+                      className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-600 font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                     />
                     <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-medium">in</span>
                   </div>
@@ -184,13 +186,13 @@ export const Calculator: React.FC = () => {
                       min="0"
                       max="7"
                       step="1"
+                      placeholder="0"
                       value={frameSoot}
                       onChange={(e) => {
                         setFrameSoot(e.target.value);
                         setManualRodOverride(null);
                       }}
-                      className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                      placeholder="e.g. 0"
+                      className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-600 font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                     />
                     <span className="absolute right-3 top-2.5 text-xs text-slate-500 font-medium">soot</span>
                   </div>
@@ -217,15 +219,15 @@ export const Calculator: React.FC = () => {
               <div className="relative pt-1">
                 <input
                   type="number"
-                  min="1"
+                  min="0"
                   step="1"
+                  placeholder="0"
                   value={rodMm}
                   onChange={(e) => {
                     setRodMm(e.target.value);
                     setManualRodOverride(null);
                   }}
-                  className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-cyan-500 rounded-xl px-3.5 py-2.5 text-white font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
-                  placeholder="e.g. 19"
+                  className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-cyan-500 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-600 font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs text-cyan-400 font-bold">mm</span>
               </div>
@@ -264,22 +266,24 @@ export const Calculator: React.FC = () => {
                   3. Internal Gap Needed
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  {Math.floor(parseFloat(gapNeededInches) || 0)} in {Math.round(((parseFloat(gapNeededInches) || 0) % 1) * 8)} soot ({Math.round((parseFloat(gapNeededInches) || 0) * 25.4)} mm)
+                  {numGapNeeded > 0
+                    ? `${Math.floor(numGapNeeded)} in ${Math.round((numGapNeeded % 1) * 8)} soot (${Math.round(numGapNeeded * 25.4)} mm)`
+                    : '0 in 0 soot (0 mm)'}
                 </span>
               </div>
 
               <div className="relative pt-1">
                 <input
                   type="number"
-                  min="0.1"
+                  min="0"
                   step="any"
+                  placeholder="0"
                   value={gapNeededInches}
                   onChange={(e) => {
                     setGapNeededInches(e.target.value);
                     setManualRodOverride(null);
                   }}
-                  className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                  placeholder="e.g. 4.5"
+                  className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-600 font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs text-amber-400 font-bold">inches</span>
               </div>
@@ -332,11 +336,11 @@ export const Calculator: React.FC = () => {
                   <p className="text-xs text-slate-400">
                     {gapCanBeMore ? (
                       <span className="text-emerald-400">
-                        ✓ <strong>Checked:</strong> Allows gap to exceed {gapNeededInches}&quot; (calculates fewer rods: <strong>{calculationResult.rodsNeeded} rods</strong>).
+                        ✓ <strong>Checked:</strong> Allows gap to exceed {gapNeededInches || '0'}&quot; (calculates fewer rods: <strong>{calculationResult.rodsNeeded} rods</strong>).
                       </span>
                     ) : (
                       <span className="text-amber-400">
-                        ⚠ <strong>Unchecked (Strict Max Limit):</strong> Gap will always stay less than or equal to {gapNeededInches}&quot; (calculates <strong>{calculationResult.rodsNeeded} rods</strong>).
+                        ⚠ <strong>Unchecked (Strict Max Limit):</strong> Gap will always stay less than or equal to {gapNeededInches || '0'}&quot; (calculates <strong>{calculationResult.rodsNeeded} rods</strong>).
                       </span>
                     )}
                   </p>
@@ -430,9 +434,9 @@ export const Calculator: React.FC = () => {
               </div>
 
               <div className="mt-4 pt-3 border-t border-slate-800/80 text-[10px] text-slate-400 flex items-center justify-between">
-                <span>Target: {gapNeededInches}&quot;</span>
-                <span className={calculationResult.gapInches >= parseFloat(gapNeededInches) ? 'text-emerald-400 font-semibold' : 'text-cyan-300 font-semibold'}>
-                  {calculationResult.gapInches >= parseFloat(gapNeededInches) ? '≥ Target' : '≤ Target'}
+                <span>Target: {gapNeededInches || '0'}&quot;</span>
+                <span className={calculationResult.gapInches >= (parseFloat(gapNeededInches) || 0) ? 'text-emerald-400 font-semibold' : 'text-cyan-300 font-semibold'}>
+                  {calculationResult.gapInches >= (parseFloat(gapNeededInches) || 0) ? '≥ Target' : '≤ Target'}
                 </span>
               </div>
             </div>
@@ -471,7 +475,7 @@ export const Calculator: React.FC = () => {
             <div className="space-y-1">
               <span className="text-slate-500 uppercase font-semibold text-[10px] block">Frame Opening</span>
               <span className="font-mono font-bold text-slate-200">
-                {frameInches}&quot; {frameSoot} soot ({calculationResult.frameTotalMm} mm)
+                {frameInches || '0'}&quot; {frameSoot || '0'} soot ({calculationResult.frameTotalMm} mm)
               </span>
             </div>
             <div className="space-y-1">
