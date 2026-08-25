@@ -57,7 +57,7 @@ export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
           </div>
           <div>
             <h3 className="font-bold text-white text-base md:text-lg flex items-center gap-2">
-              Interactive 2D Frame & Rod Visualizer
+              Interactive 2D Frame &amp; Rod Visualizer
             </h3>
             <p className="text-xs text-slate-400">
               Proportional preview of frame, internal gaps, and rods
@@ -171,9 +171,9 @@ export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
               strokeWidth="1.5"
             />
             <rect
-              x={svgWidth / 2 - 110}
+              x={svgWidth / 2 - 120}
               y={10}
-              width={220}
+              width={240}
               height={20}
               fill="#0f172a"
               rx={4}
@@ -189,7 +189,7 @@ export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
               textAnchor="middle"
               className="font-mono"
             >
-              FRAME INNER: {frameTotalInches.toFixed(3)}&quot; ({Math.floor(frameTotalInches)}&quot; {((frameTotalInches % 1) * 8).toFixed(1)} soot)
+              FRAME INNER: {Math.floor(frameTotalInches)}&quot; {Math.round((frameTotalInches % 1) * 8)} SOOT ({result.frameTotalMm} MM)
             </text>
           </g>
 
@@ -407,7 +407,7 @@ export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-gradient-to-r from-slate-400 to-slate-200 inline-block border border-slate-600"></span>
-            <span>Rods ({result.rodMm}mm / {result.rodInches.toFixed(3)}&quot;)</span>
+            <span>Rods ({result.rodMm} mm / {result.rodSoot} soot)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm bg-cyan-950 border border-cyan-500/50 inline-block"></span>

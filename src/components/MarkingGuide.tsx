@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { CalculationResult } from '@/utils/calculator';
-import { Ruler, Copy, Check, ListOrdered, Sparkles } from 'lucide-react';
+import { Ruler, Copy, Check } from 'lucide-react';
 
 interface MarkingGuideProps {
   result: CalculationResult;
@@ -19,15 +19,15 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
   }
 
   const handleCopyText = () => {
-    let text = `--- ROD GAP FABRICATION SHEET ---\n`;
-    text += `Frame Inner Width: ${frameTotalInches.toFixed(3)}" (${Math.floor(frameTotalInches)}" ${((frameTotalInches % 1) * 8).toFixed(1)} soot)\n`;
+    let text = `--- FABRICATION MARKING SPECIFICATION ---\n`;
+    text += `Frame Inner Width: ${frameTotalInches} in (${Math.floor(frameTotalInches)} in ${Math.round((frameTotalInches % 1) * 8)} soot / ${result.frameTotalMm} mm)\n`;
     text += `Rods Needed: ${rodsNeeded} rods (${rodMm} mm)\n`;
-    text += `Internal Gap: ${gapBreakdown.formattedString} (${result.gapMm.toFixed(1)} mm)\n`;
+    text += `Internal Gap: ${gapBreakdown.formattedString} (${result.gapMm} mm)\n`;
     text += `Internal Gaps Created: ${result.internalGapsCreated}\n\n`;
     text += `Tape Measure Marking Positions (From Left Frame Inner Edge):\n`;
 
     markings.forEach((m) => {
-      text += `Rod #${m.rodIndex}: Left Edge = ${m.leftEdgeSootString} (${m.leftEdgeMm.toFixed(1)}mm) | Center = ${m.centerSootString} (${m.centerMm.toFixed(1)}mm)\n`;
+      text += `Rod #${m.rodIndex}: Left Edge = ${m.leftEdgeSootString} (${m.leftEdgeMm} mm) | Center = ${m.centerSootString} (${m.centerMm} mm)\n`;
     });
 
     navigator.clipboard.writeText(text);
@@ -44,7 +44,7 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
           </div>
           <div>
             <h3 className="font-bold text-white text-base md:text-lg flex items-center gap-2">
-              Workshop Marking & Layout Guide
+              Workshop Marking &amp; Layout Guide
               <span className="text-[10px] uppercase tracking-wider bg-cyan-500/20 text-cyan-300 font-semibold px-2 py-0.5 rounded-full border border-cyan-500/30">
                 Tape Measure Offsets
               </span>
@@ -72,7 +72,7 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
                 activeUnit === 'soot' ? 'bg-cyan-600 text-white font-medium shadow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Inch & Soot
+              Inch &amp; Soot
             </button>
             <button
               onClick={() => setActiveUnit('mm')}
@@ -130,7 +130,7 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
                     <div className="font-semibold text-cyan-300">{m.leftEdgeSootString}</div>
                   )}
                   {activeUnit !== 'soot' && (
-                    <div className="text-[11px] text-slate-400">{m.leftEdgeMm.toFixed(1)} mm</div>
+                    <div className="text-[11px] text-slate-400">{m.leftEdgeMm} mm</div>
                   )}
                 </td>
 
@@ -140,7 +140,7 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
                     <div className="font-bold text-amber-300">{m.centerSootString}</div>
                   )}
                   {activeUnit !== 'soot' && (
-                    <div className="text-[11px] text-amber-500/80">{m.centerMm.toFixed(1)} mm</div>
+                    <div className="text-[11px] text-amber-500/80">{m.centerMm} mm</div>
                   )}
                 </td>
 
@@ -150,7 +150,7 @@ export const MarkingGuide: React.FC<MarkingGuideProps> = ({ result }) => {
                     <div className="text-slate-300">{m.rightEdgeSootString}</div>
                   )}
                   {activeUnit !== 'soot' && (
-                    <div className="text-[11px] text-slate-400">{m.rightEdgeMm.toFixed(1)} mm</div>
+                    <div className="text-[11px] text-slate-400">{m.rightEdgeMm} mm</div>
                   )}
                 </td>
               </tr>

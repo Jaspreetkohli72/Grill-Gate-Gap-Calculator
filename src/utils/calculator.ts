@@ -10,8 +10,6 @@ export interface CalculationInput {
 export interface SootBreakdown {
   wholeInches: number;
   wholeSoot: number;
-  fractionalSoot: number;
-  fractionalSootText: string;
   totalSoot: number;
   formattedString: string;
   detailedDisplay: string;
@@ -71,61 +69,35 @@ export interface CalculationResult {
   warningMessage?: string;
 }
 
+/**
+ * Converts any inches value into clean integer Inches and integer Soot
+ * Rule: 1 inch = 8 soot.
+ * All soot values are strictly rounded off to nearest integer (e.g. 1.8 -> 2 soot, 1.2 -> 1 soot).
+ * No decimals appear anywhere.
+ */
 export function convertInchesToSootBreakdown(totalInches: number): SootBreakdown {
-  if (isNaN(totalInches) || totalInches < 0) {
+  if (isNaN(totalInches) || totalInches <= 0) {
     return {
       wholeInches: 0,
       wholeSoot: 0,
-      fractionalSoot: 0,
-      fractionalSootText: '',
       totalSoot: 0,
       formattedString: '0 inch 0 soot',
       detailedDisplay: '0" 0 soot',
     };
   }
 
-  const totalSoot = totalInches * 8;
-  const wholeInches = Math.floor(totalInches);
-  const remainingInches = totalInches - wholeInches;
-  const remainingSootDecimal = remainingInches * 8;
-  const wholeSoot = Math.floor(remainingSootDecimal);
-  const fractionalSoot = remainingSootDecimal - wholeSoot;
+  // Strictly round total soot to nearest whole integer
+  const roundedTotalSoot = Math.round(totalInches * 8);
+  const wholeInches = Math.floor(roundedTotalSoot / 8);
+  const wholeSoot = roundedTotalSoot % 8;
 
-  // Format fraction of a soot nicely (nearest 1/8, 1/4, 1/2, 3/4 soot or clean decimal)
-  let fractionalSootText = '';
-  const roundedSubSoot = Math.round(fractionalSoot * 8) / 8;
-
-  if (roundedSubSoot >= 0.875) {
-    fractionalSootText = '';
-    // If it rounds up to whole soot
-  } else if (Math.abs(roundedSubSoot - 0.75) < 0.05) {
-    fractionalSootText = '3/4';
-  } else if (Math.abs(roundedSubSoot - 0.5) < 0.05) {
-    fractionalSootText = '1/2';
-  } else if (Math.abs(roundedSubSoot - 0.25) < 0.05) {
-    fractionalSootText = '1/4';
-  } else if (Math.abs(roundedSubSoot - 0.125) < 0.05) {
-    fractionalSootText = '1/8';
-  } else if (roundedSubSoot > 0.02) {
-    fractionalSootText = roundedSubSoot.toFixed(2).replace(/^0+/, '');
-  }
-
-  const sootDecimalFormatted = remainingSootDecimal.toFixed(2).replace(/\.00$/, '');
-  const formattedString = `${wholeInches} inch ${sootDecimalFormatted} soot`;
-  
-  let detailedDisplay = `${wholeInches}"`;
-  if (wholeSoot > 0 || fractionalSootText) {
-    detailedDisplay += ` ${wholeSoot}${fractionalSootText ? ' ' + fractionalSootText : ''} soot`;
-  } else {
-    detailedDisplay += ` 0 soot`;
-  }
+  const formattedString = `${wholeInches} inch ${wholeSoot} soot`;
+  const detailedDisplay = `${wholeInches}" ${wholeSoot} soot`;
 
   return {
     wholeInches,
     wholeSoot,
-    fractionalSoot,
-    fractionalSootText,
-    totalSoot,
+    totalSoot: roundedTotalSoot,
     formattedString,
     detailedDisplay,
   };
@@ -137,20 +109,20 @@ export function formatInchesToSootString(inches: number): string {
 }
 
 export function calculateRodGaps(input: CalculationInput): CalculationResult {
-  const safeFrameInches = Math.max(0, input.frameInches || 0);
-  const safeFrameSoot = Math.max(0, input.frameSoot || 0);
-  const safeRodMm = Math.max(0, input.rodMm || 0);
-  const safeGapNeededInches = Math.max(0, input.gapNeededInches || 0);
+  const safeFrameInches = Math.max(0, Math.round(input.frameInches || 0));
+  const safeFrameSoot = Math.max(0, Math.round(input.frameSoot || 0));
+  const safeRodMm = Math.max(0, Math.round(input.rodMm || 0));
+  const safeGapNeededInches = Math.max(0, Math.round(input.gapNeededInches || 0));
 
   // 1. Total frame width in inches
   // 1 inch = 8 soot, so frameSoot / 8 gives additional inches
   const frameTotalInches = safeFrameInches + (safeFrameSoot / 8);
-  const frameTotalMm = frameTotalInches * 25.4;
-  const frameTotalSoot = frameTotalInches * 8;
+  const frameTotalMm = Math.round(frameTotalInches * 25.4);
+  const frameTotalSoot = Math.round(frameTotalInches * 8);
 
   // 2. Filler material width
   const rodInches = safeRodMm > 0 ? safeRodMm / 25.4 : 0;
-  const rodSoot = rodInches * 8;
+  const rodSoot = Math.round(rodInches * 8);
 
   // 3. Number of rods calculation
   // Formula:
@@ -167,13 +139,21 @@ export function calculateRodGaps(input: CalculationInput): CalculationResult {
       computedRods = 0;
     } else {
       if (input.gapCanBeMore) {
-        // If gap can be more than needed, we round down rod count
-        // Fewer rods => larger gap
+        // If gap can be more than needed: round down rod count (fewer rods => larger gap)
         computedRods = Math.floor(idealRods);
       } else {
-        // Gap cannot exceed needed gap, so we round up rod count
-        // More rods => smaller gap <= needed gap
-        computedRods = Math.ceil(idealRods);
+        // Gap MUST always stay less than or equal to whatever the user has inputed
+        // Start from ceil(idealRods) and increment if needed to guarantee gap <= safeGapNeededInches
+        let candidateRods = Math.max(0, Math.ceil(idealRods));
+        while (candidateRods < 1000) {
+          const testRemainingSpace = frameTotalInches - (candidateRods * rodInches);
+          const testGap = testRemainingSpace / (candidateRods + 1);
+          if (testGap <= safeGapNeededInches + 1e-9) {
+            break;
+          }
+          candidateRods++;
+        }
+        computedRods = candidateRods;
       }
     }
   }
@@ -202,27 +182,26 @@ export function calculateRodGaps(input: CalculationInput): CalculationResult {
   const gapInches = internalGapsCreated > 0 && totalGapSpaceInches > 0
     ? totalGapSpaceInches / internalGapsCreated
     : 0;
-  const gapMm = gapInches * 25.4;
-  const gapSoot = gapInches * 8;
+  const gapMm = Math.round(gapInches * 25.4);
+  const gapSoot = Math.round(gapInches * 8);
   const gapBreakdown = convertInchesToSootBreakdown(gapInches);
 
   // Pitch (Center to Center distance)
   const pitchInches = gapInches + rodInches;
-  const pitchMm = pitchInches * 25.4;
-  const pitchSoot = pitchInches * 8;
+  const pitchMm = Math.round(pitchInches * 25.4);
+  const pitchSoot = Math.round(pitchInches * 8);
   const pitchBreakdown = convertInchesToSootBreakdown(pitchInches);
 
-  // Summary outputs matching user prompt
+  // Summary outputs matching user prompt (no decimals!)
   const summaryRodsText = `${rodsNeeded} rods/pipe needed`;
   const summaryGapText = `${gapBreakdown.formattedString} internal gap between rod/pipe`;
   const summaryGapsCreatedText = `${internalGapsCreated} internal gaps created`;
 
-  // 5. Generate marking positions for fabricator tape measure layout
+  // 5. Generate marking positions for fabricator tape measure layout (rounded clean values)
   const markings: MarkingPosition[] = [];
   let currentOffsetInches = 0;
 
   for (let i = 1; i <= rodsNeeded; i++) {
-    // Gap before rod i
     const leftEdgeInches = currentOffsetInches + gapInches;
     const centerInches = leftEdgeInches + (rodInches / 2);
     const rightEdgeInches = leftEdgeInches + rodInches;
@@ -231,13 +210,13 @@ export function calculateRodGaps(input: CalculationInput): CalculationResult {
       rodIndex: i,
       leftEdgeInches,
       leftEdgeSootString: formatInchesToSootString(leftEdgeInches),
-      leftEdgeMm: leftEdgeInches * 25.4,
+      leftEdgeMm: Math.round(leftEdgeInches * 25.4),
       centerInches,
       centerSootString: formatInchesToSootString(centerInches),
-      centerMm: centerInches * 25.4,
+      centerMm: Math.round(centerInches * 25.4),
       rightEdgeInches,
       rightEdgeSootString: formatInchesToSootString(rightEdgeInches),
-      rightEdgeMm: rightEdgeInches * 25.4,
+      rightEdgeMm: Math.round(rightEdgeInches * 25.4),
     });
 
     currentOffsetInches = rightEdgeInches;

@@ -18,7 +18,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
-                Grill &amp; Gate Gap Calculator <span className="text-amber-400 font-mono text-xs px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded">Soot Pro</span>
+                Grill &amp; Gate Gap Calculator
               </h1>
               <p className="text-[11px] text-slate-400 hidden sm:block">
                 Equal internal spacing for grill, gate, railing, and baluster fabrication

@@ -10,19 +10,14 @@ import { FrameVisualizer } from './FrameVisualizer';
 import { MarkingGuide } from './MarkingGuide';
 import { SootReferenceTable } from './SootReferenceTable';
 import {
-  Sliders,
-  Sparkles,
   RotateCcw,
-  CheckCircle2,
   Copy,
   Check,
   Plus,
   Minus,
-  AlertTriangle,
   Info,
-  Maximize,
-  ArrowRight,
   ShieldAlert,
+  Sparkles,
 } from 'lucide-react';
 
 export const Calculator: React.FC = () => {
@@ -38,10 +33,10 @@ export const Calculator: React.FC = () => {
   // Compute calculation results in real-time
   const calculationResult: CalculationResult = useMemo(() => {
     const input: CalculationInput = {
-      frameInches: parseFloat(frameInches) || 0,
-      frameSoot: parseFloat(frameSoot) || 0,
-      rodMm: parseFloat(rodMm) || 0,
-      gapNeededInches: parseFloat(gapNeededInches) || 0,
+      frameInches: Math.round(parseFloat(frameInches) || 0),
+      frameSoot: Math.round(parseFloat(frameSoot) || 0),
+      rodMm: Math.round(parseFloat(rodMm) || 0),
+      gapNeededInches: Math.round(parseFloat(gapNeededInches) || 0),
       gapCanBeMore,
       manualRodAdjustment: manualRodOverride !== null ? manualRodOverride : undefined,
     };
@@ -57,56 +52,33 @@ export const Calculator: React.FC = () => {
     setManualRodOverride(null);
   };
 
-  const handleApplyPreset = (preset: {
-    inches: string;
-    soot: string;
-    rod: string;
-    gap: string;
-    canBeMore: boolean;
-  }) => {
-    setFrameInches(preset.inches);
-    setFrameSoot(preset.soot);
-    setRodMm(preset.rod);
-    setGapNeededInches(preset.gap);
-    setGapCanBeMore(preset.canBeMore);
-    setManualRodOverride(null);
-  };
-
   const handleCopySummary = () => {
-    const text = `--- ROD GAP SPECIFICATION ---\n` +
-      `Frame Internal Width: ${calculationResult.frameTotalInches.toFixed(3)}" (${frameInches} in ${frameSoot} soot)\n` +
-      `Filler Pipe/Rod Width: ${calculationResult.rodMm} mm (${calculationResult.rodInches.toFixed(3)}")\n` +
-      `Target Gap: ${gapNeededInches}"\n\n` +
+    const text = `--- GRILL & GATE GAP SPECIFICATION ---\n` +
+      `Frame Internal Width: ${calculationResult.frameTotalInches} in (${frameInches} in ${frameSoot} soot / ${calculationResult.frameTotalMm} mm)\n` +
+      `Filler Pipe/Rod Width: ${calculationResult.rodMm} mm\n` +
+      `Target Gap: ${gapNeededInches} in\n\n` +
       `=== RESULTS ===\n` +
       `✓ ${calculationResult.summaryRodsText}\n` +
-      `✓ ${calculationResult.summaryGapText} (${calculationResult.gapMm.toFixed(1)} mm)\n` +
+      `✓ ${calculationResult.summaryGapText} (${calculationResult.gapMm} mm)\n` +
       `✓ ${calculationResult.summaryGapsCreatedText}\n` +
-      `Center-to-Center Pitch: ${calculationResult.pitchBreakdown.formattedString} (${calculationResult.pitchMm.toFixed(1)} mm)`;
+      `Center-to-Center Pitch: ${calculationResult.pitchBreakdown.formattedString} (${calculationResult.pitchMm} mm)`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Preset options for quick fabrication jobs
-  const standardPresets = [
-    { name: 'Standard Window Grill (48")', inches: '48', soot: '0', rod: '12', gap: '4', canBeMore: true },
-    { name: 'Main Gate Panel (60" 4 Soot)', inches: '60', soot: '4', rod: '25.4', gap: '4.5', canBeMore: true },
-    { name: 'Balcony Safety Railing (72")', inches: '72', soot: '0', rod: '19', gap: '4', canBeMore: false },
-    { name: 'Staircase Baluster (36")', inches: '36', soot: '2', rod: '16', gap: '3.5', canBeMore: false },
-  ];
-
   const standardRodSizes = [
-    { label: '10 mm (3/8" rod)', val: '10' },
+    { label: '10 mm (3/8" bar)', val: '10' },
     { label: '12 mm (1/2" bar)', val: '12' },
     { label: '16 mm (5/8" pipe)', val: '16' },
     { label: '19 mm (3/4" pipe)', val: '19' },
-    { label: '25.4 mm (1" pipe)', val: '25.4' },
+    { label: '25 mm (1" pipe)', val: '25' },
     { label: '38 mm (1.5" pipe)', val: '38' },
     { label: '50 mm (2" pipe)', val: '50' },
   ];
 
-  const standardGapSizes = ['3', '3.5', '4', '4.5', '5', '6'];
+  const standardGapSizes = ['3', '4', '5', '6'];
 
   return (
     <div className="space-y-8 pb-16">
@@ -125,7 +97,7 @@ export const Calculator: React.FC = () => {
               Grill &amp; Gate Gap Calculator
             </h1>
             <p className="text-slate-400 text-sm md:text-base max-w-2xl">
-              Calculate exact rod/pipe counts, equal internal gaps in inches & soot, center-to-center pitch, and tape-measure fabrication layout.
+              Calculate exact rod/pipe counts, equal internal gaps in rounded whole inches &amp; soot, center-to-center pitch, and tape-measure fabrication layout.
             </p>
           </div>
 
@@ -155,23 +127,6 @@ export const Calculator: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* Quick Presets Pills */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 mr-1 flex items-center gap-1">
-            <Sliders className="w-3.5 h-3.5 text-amber-400" />
-            Quick Presets:
-          </span>
-          {standardPresets.map((preset, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleApplyPreset(preset)}
-              className="text-xs px-3 py-1.5 rounded-lg bg-slate-950/70 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              {preset.name}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Main Grid: Inputs Left, Primary Outputs Right */}
@@ -195,7 +150,7 @@ export const Calculator: React.FC = () => {
                   1. Frame Internal Width
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  Total: {calculationResult.frameTotalInches.toFixed(3)}&quot; ({calculationResult.frameTotalMm.toFixed(1)} mm)
+                  {frameInches} in {frameSoot} soot ({calculationResult.frameTotalMm} mm)
                 </span>
               </div>
 
@@ -207,7 +162,7 @@ export const Calculator: React.FC = () => {
                     <input
                       type="number"
                       min="0"
-                      step="any"
+                      step="1"
                       value={frameInches}
                       onChange={(e) => {
                         setFrameInches(e.target.value);
@@ -227,8 +182,8 @@ export const Calculator: React.FC = () => {
                     <input
                       type="number"
                       min="0"
-                      max="7.99"
-                      step="any"
+                      max="7"
+                      step="1"
                       value={frameSoot}
                       onChange={(e) => {
                         setFrameSoot(e.target.value);
@@ -255,15 +210,15 @@ export const Calculator: React.FC = () => {
                   2. Filler Material (Rod/Pipe) Width
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  {calculationResult.rodInches.toFixed(3)}&quot; ({calculationResult.rodSoot.toFixed(2)} soot)
+                  {calculationResult.rodMm} mm ({calculationResult.rodSoot} soot)
                 </span>
               </div>
 
               <div className="relative pt-1">
                 <input
                   type="number"
-                  min="0.1"
-                  step="any"
+                  min="1"
+                  step="1"
                   value={rodMm}
                   onChange={(e) => {
                     setRodMm(e.target.value);
@@ -309,15 +264,15 @@ export const Calculator: React.FC = () => {
                   3. Internal Gap Needed
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  {( (parseFloat(gapNeededInches) || 0) * 25.4 ).toFixed(1)} mm
+                  {Math.round((parseFloat(gapNeededInches) || 0) * 25.4)} mm
                 </span>
               </div>
 
               <div className="relative pt-1">
                 <input
                   type="number"
-                  min="0.1"
-                  step="any"
+                  min="1"
+                  step="1"
                   value={gapNeededInches}
                   onChange={(e) => {
                     setGapNeededInches(e.target.value);
@@ -377,7 +332,7 @@ export const Calculator: React.FC = () => {
                       </span>
                     ) : (
                       <span className="text-amber-400">
-                        ⚠ <strong>Unchecked (Max Gap Constraint):</strong> Gap will not exceed {gapNeededInches}&quot; (calculates more rods: <strong>{calculationResult.rodsNeeded} rods</strong>).
+                        ⚠ <strong>Unchecked (Strict Max Limit):</strong> Gap will always stay less than or equal to {gapNeededInches}&quot; (calculates <strong>{calculationResult.rodsNeeded} rods</strong>).
                       </span>
                     )}
                   </p>
@@ -398,7 +353,7 @@ export const Calculator: React.FC = () => {
             </div>
           )}
 
-          {/* THREE MAIN PROMINENT OUTPUT CARDS (Exact Output Spec) */}
+          {/* THREE MAIN PROMINENT OUTPUT CARDS (Exact Output Spec - No Decimals) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
             {/* OUTPUT 1: "x" rods/pipe needed */}
@@ -447,7 +402,7 @@ export const Calculator: React.FC = () => {
               </div>
             </div>
 
-            {/* OUTPUT 2: "x" inch "x" soot internal gap between rod/pipe */}
+            {/* OUTPUT 2: "x" inch "x" soot internal gap between rod/pipe (Strictly Rounded, No Decimals) */}
             <div className="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-cyan-500/40 hover:border-cyan-500/70 rounded-3xl p-5 shadow-xl transition-all relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
               
@@ -460,13 +415,13 @@ export const Calculator: React.FC = () => {
 
               <div className="space-y-1">
                 <div className="text-2xl sm:text-3xl md:text-3xl font-black text-white font-mono tracking-tight leading-none">
-                  {calculationResult.gapBreakdown.wholeInches}&quot; {((calculationResult.gapInches - calculationResult.gapBreakdown.wholeInches) * 8).toFixed(1)} soot
+                  {calculationResult.gapBreakdown.wholeInches}&quot; {calculationResult.gapBreakdown.wholeSoot} soot
                 </div>
                 <div className="text-xs font-semibold text-cyan-300 pt-1">
-                  &quot;{calculationResult.gapBreakdown.wholeInches}&quot; inch &quot;{((calculationResult.gapInches - calculationResult.gapBreakdown.wholeInches) * 8).toFixed(1)}&quot; soot gap
+                  &quot;{calculationResult.gapBreakdown.wholeInches}&quot; inch &quot;{calculationResult.gapBreakdown.wholeSoot}&quot; soot gap
                 </div>
                 <div className="text-[11px] text-slate-400 font-mono">
-                  = {calculationResult.gapMm.toFixed(1)} mm ({calculationResult.gapInches.toFixed(3)}&quot;)
+                  = {calculationResult.gapMm} mm ({calculationResult.gapBreakdown.totalSoot} soot)
                 </div>
               </div>
 
@@ -507,30 +462,30 @@ export const Calculator: React.FC = () => {
 
           </div>
 
-          {/* Quick Technical Specs Summary Bar */}
+          {/* Quick Technical Specs Summary Bar (All Rounded Clean Numbers) */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-lg grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div className="space-y-1">
               <span className="text-slate-500 uppercase font-semibold text-[10px] block">Frame Opening</span>
               <span className="font-mono font-bold text-slate-200">
-                {calculationResult.frameTotalInches.toFixed(3)}&quot; ({calculationResult.frameTotalMm.toFixed(1)} mm)
+                {frameInches}&quot; {frameSoot} soot ({calculationResult.frameTotalMm} mm)
               </span>
             </div>
             <div className="space-y-1">
               <span className="text-slate-500 uppercase font-semibold text-[10px] block">Filler Size</span>
               <span className="font-mono font-bold text-cyan-300">
-                {calculationResult.rodMm} mm ({calculationResult.rodInches.toFixed(3)}&quot;)
+                {calculationResult.rodMm} mm ({calculationResult.rodSoot} soot)
               </span>
             </div>
             <div className="space-y-1">
               <span className="text-slate-500 uppercase font-semibold text-[10px] block">Total Rod Space</span>
               <span className="font-mono font-bold text-amber-300">
-                {(calculationResult.rodsNeeded * calculationResult.rodInches).toFixed(3)}&quot; ({(calculationResult.rodsNeeded * calculationResult.rodMm).toFixed(1)} mm)
+                {calculationResult.rodsNeeded * calculationResult.rodMm} mm
               </span>
             </div>
             <div className="space-y-1">
               <span className="text-slate-500 uppercase font-semibold text-[10px] block">Center Pitch (C-to-C)</span>
               <span className="font-mono font-bold text-emerald-400">
-                {calculationResult.pitchBreakdown.formattedString} ({calculationResult.pitchMm.toFixed(1)} mm)
+                {calculationResult.pitchBreakdown.formattedString} ({calculationResult.pitchMm} mm)
               </span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-# Grill & Gate Gap Calculator (Soot Pro)
+# Grill & Gate Gap Calculator
 
 A Next.js web application built for metal fabricators, welders, carpenters, and railing specialists to calculate equal rod/pipe spacing inside a frame using both standard inches and the traditional **Soot** measurement unit ($1\text{ inch} = 8\text{ soot}$).
 

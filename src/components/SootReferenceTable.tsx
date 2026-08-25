@@ -1,28 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, ArrowRightLeft, Calculator as CalcIcon } from 'lucide-react';
+import { BookOpen, ArrowRightLeft } from 'lucide-react';
 
 export const SootReferenceTable: React.FC = () => {
   const [testSoot, setTestSoot] = useState<string>('4');
-  const [testMm, setTestMm] = useState<string>('12.7');
+  const [testMm, setTestMm] = useState<string>('13');
 
   const sootTable = [
-    { soot: 1, fraction: '1/8"', decimal: '0.125"', mm: '3.175 mm', desc: '1 Soot' },
-    { soot: 2, fraction: '1/4" (2/8")', decimal: '0.250"', mm: '6.350 mm', desc: '2 Soot (Quarter)' },
-    { soot: 3, fraction: '3/8"', decimal: '0.375"', mm: '9.525 mm', desc: '3 Soot' },
-    { soot: 4, fraction: '1/2" (4/8")', decimal: '0.500"', mm: '12.700 mm', desc: '4 Soot (Aadha Inch)' },
-    { soot: 5, fraction: '5/8"', decimal: '0.625"', mm: '15.875 mm', desc: '5 Soot' },
-    { soot: 6, fraction: '3/4" (6/8")', decimal: '0.750"', mm: '19.050 mm', desc: '6 Soot (Pauna Inch)' },
-    { soot: 7, fraction: '7/8"', decimal: '0.875"', mm: '22.225 mm', desc: '7 Soot' },
-    { soot: 8, fraction: '1" (8/8")', decimal: '1.000"', mm: '25.400 mm', desc: '1 Full Inch' },
+    { soot: 1, fraction: '1/8"', mm: '3 mm', desc: '1 Soot' },
+    { soot: 2, fraction: '1/4" (2/8")', mm: '6 mm', desc: '2 Soot (Quarter)' },
+    { soot: 3, fraction: '3/8"', mm: '10 mm', desc: '3 Soot' },
+    { soot: 4, fraction: '1/2" (4/8")', mm: '13 mm', desc: '4 Soot (Aadha Inch)' },
+    { soot: 5, fraction: '5/8"', mm: '16 mm', desc: '5 Soot' },
+    { soot: 6, fraction: '3/4" (6/8")', mm: '19 mm', desc: '6 Soot (Pauna Inch)' },
+    { soot: 7, fraction: '7/8"', mm: '22 mm', desc: '7 Soot' },
+    { soot: 8, fraction: '1" (8/8")', mm: '25 mm', desc: '1 Full Inch' },
   ];
 
   const handleSootChange = (val: string) => {
     setTestSoot(val);
     const num = parseFloat(val);
     if (!isNaN(num)) {
-      setTestMm(((num / 8) * 25.4).toFixed(2));
+      setTestMm(Math.round((num / 8) * 25.4).toString());
     }
   };
 
@@ -30,9 +30,13 @@ export const SootReferenceTable: React.FC = () => {
     setTestMm(val);
     const num = parseFloat(val);
     if (!isNaN(num)) {
-      setTestSoot(((num / 25.4) * 8).toFixed(2));
+      setTestSoot(Math.round((num / 25.4) * 8).toString());
     }
   };
+
+  const currentSootNum = parseFloat(testSoot) || 0;
+  const convertedInches = Math.floor(currentSootNum / 8);
+  const convertedRemSoot = Math.round(currentSootNum % 8);
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 md:p-6 shadow-xl backdrop-blur-md">
@@ -46,7 +50,7 @@ export const SootReferenceTable: React.FC = () => {
               Soot ↔ Inch ↔ MM Conversion Chart
             </h3>
             <p className="text-xs text-slate-400">
-              Standard Indian & British Imperial Soot Scale (1 Inch = 8 Soot)
+              Standard Indian &amp; British Imperial Soot Scale (1 Inch = 8 Soot)
             </p>
           </div>
         </div>
@@ -67,9 +71,8 @@ export const SootReferenceTable: React.FC = () => {
                 {item.fraction}
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
-              <div>{item.decimal}</div>
-              <div className="text-cyan-400/90 font-semibold">{item.mm}</div>
+            <div className="text-xs text-cyan-400 font-semibold font-mono">
+              {item.mm}
             </div>
           </div>
         ))}
@@ -86,7 +89,7 @@ export const SootReferenceTable: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <input
               type="number"
-              step="any"
+              step="1"
               value={testSoot}
               onChange={(e) => handleSootChange(e.target.value)}
               className="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-amber-300 font-mono font-bold text-center focus:outline-none focus:border-amber-500"
@@ -99,7 +102,7 @@ export const SootReferenceTable: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <input
               type="number"
-              step="any"
+              step="1"
               value={testMm}
               onChange={(e) => handleMmChange(e.target.value)}
               className="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-cyan-300 font-mono font-bold text-center focus:outline-none focus:border-cyan-500"
@@ -109,8 +112,8 @@ export const SootReferenceTable: React.FC = () => {
 
           <span className="text-slate-500">=</span>
 
-          <div className="text-slate-300 font-mono">
-            {((parseFloat(testSoot) || 0) / 8).toFixed(3)}&quot; Inches
+          <div className="text-slate-300 font-mono font-semibold">
+            {convertedInches} in {convertedRemSoot} soot
           </div>
         </div>
       </div>
