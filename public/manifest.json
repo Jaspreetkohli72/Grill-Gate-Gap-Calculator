@@ -1,0 +1,31 @@
+{
+  "name": "Grill & Gate Gap Calculator",
+  "short_name": "Gap Calc",
+  "description": "Precision rod, pipe, grill, and gate gap calculator with Indian & British Soot unit conversion (1 inch = 8 soot), center-to-center pitch, and workshop tape measure layout.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["utilities", "productivity"]
+}

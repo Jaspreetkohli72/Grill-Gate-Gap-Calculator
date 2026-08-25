@@ -11,11 +11,11 @@ export default function Home() {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-amber-400" />
-              </div>
-            </div>
+            <img
+              src="/icon.png"
+              alt="Grill & Gate Gap Calculator Logo"
+              className="w-10 h-10 rounded-xl shadow-lg shadow-amber-500/10 border border-slate-700/80 object-cover"
+            />
             <div>
               <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
                 Grill &amp; Gate Gap Calculator
