@@ -36,7 +36,7 @@ export const Calculator: React.FC = () => {
       frameInches: Math.round(parseFloat(frameInches) || 0),
       frameSoot: Math.round(parseFloat(frameSoot) || 0),
       rodMm: Math.round(parseFloat(rodMm) || 0),
-      gapNeededInches: Math.round(parseFloat(gapNeededInches) || 0),
+      gapNeededInches: parseFloat(gapNeededInches) || 0,
       gapCanBeMore,
       manualRodAdjustment: manualRodOverride !== null ? manualRodOverride : undefined,
     };
@@ -78,7 +78,7 @@ export const Calculator: React.FC = () => {
     { label: '50 mm (2" pipe)', val: '50' },
   ];
 
-  const standardGapSizes = ['3', '4', '5', '6'];
+  const standardGapSizes = ['3', '3.5', '4', '4.5', '5', '6'];
 
   return (
     <div className="space-y-8 pb-16">
@@ -257,31 +257,35 @@ export const Calculator: React.FC = () => {
               </div>
             </div>
 
-            {/* Input 3: Internal gap needed (Unit in Inches) */}
+            {/* Input 3: Internal gap needed (Unit in Inches - Supports decimals like 4.5, 3.5) */}
             <div className="space-y-2 bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                   3. Internal Gap Needed
                 </label>
                 <span className="text-[11px] text-slate-400 font-mono">
-                  {Math.round((parseFloat(gapNeededInches) || 0) * 25.4)} mm
+                  {Math.floor(parseFloat(gapNeededInches) || 0)} in {Math.round(((parseFloat(gapNeededInches) || 0) % 1) * 8)} soot ({Math.round((parseFloat(gapNeededInches) || 0) * 25.4)} mm)
                 </span>
               </div>
 
               <div className="relative pt-1">
                 <input
                   type="number"
-                  min="1"
-                  step="1"
+                  min="0.1"
+                  step="any"
                   value={gapNeededInches}
                   onChange={(e) => {
                     setGapNeededInches(e.target.value);
                     setManualRodOverride(null);
                   }}
                   className="w-full bg-slate-900 border border-slate-700 hover:border-slate-600 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-white font-mono text-base font-bold transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                  placeholder="e.g. 4"
+                  placeholder="e.g. 4.5"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs text-amber-400 font-bold">inches</span>
+              </div>
+
+              <div className="text-[11px] text-slate-400 pt-0.5">
+                Note: Decimal inches supported (e.g. <strong>4.5</strong> = 4 in 4 soot, <strong>3.5</strong> = 3 in 4 soot).
               </div>
 
               {/* Quick Gap Buttons */}

@@ -112,7 +112,7 @@ export function calculateRodGaps(input: CalculationInput): CalculationResult {
   const safeFrameInches = Math.max(0, Math.round(input.frameInches || 0));
   const safeFrameSoot = Math.max(0, Math.round(input.frameSoot || 0));
   const safeRodMm = Math.max(0, Math.round(input.rodMm || 0));
-  const safeGapNeededInches = Math.max(0, Math.round(input.gapNeededInches || 0));
+  const safeGapNeededInches = Math.max(0, input.gapNeededInches || 0);
 
   // 1. Total frame width in inches
   // 1 inch = 8 soot, so frameSoot / 8 gives additional inches
