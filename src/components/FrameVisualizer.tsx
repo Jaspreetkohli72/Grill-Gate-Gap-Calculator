@@ -2,13 +2,19 @@
 
 import React, { useState } from 'react';
 import { CalculationResult } from '@/utils/calculator';
-import { Layers, Eye, Maximize2, HelpCircle } from 'lucide-react';
+import { Layers, Eye, Maximize2, HelpCircle, AlertCircle, ArrowRight } from 'lucide-react';
 
 interface FrameVisualizerProps {
   result: CalculationResult;
+  inputState: {
+    frameInches: string;
+    frameSoot: string;
+    rodMm: string;
+    gapNeededInches: string;
+  };
 }
 
-export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
+export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result, inputState }) => {
   const [hoveredRod, setHoveredRod] = useState<number | null>(null);
   const [hoveredGap, setHoveredGap] = useState<number | null>(null);
   const [showMarkings, setShowMarkings] = useState<boolean>(true);
@@ -25,10 +31,55 @@ export const FrameVisualizer: React.FC<FrameVisualizerProps> = ({ result }) => {
     markings,
   } = result;
 
-  if (frameTotalInches <= 0) {
+  // Check which inputs are missing
+  const hasFrame = (parseFloat(inputState.frameInches) || 0) > 0 || (parseFloat(inputState.frameSoot) || 0) > 0;
+  const hasRod = (parseFloat(inputState.rodMm) || 0) > 0;
+  const hasGap = (parseFloat(inputState.gapNeededInches) || 0) > 0;
+
+  const missingInputs: string[] = [];
+  if (!hasFrame) missingInputs.push('1. Frame Internal Width (Inches / Soot)');
+  if (!hasRod) missingInputs.push('2. Filler Material (Rod/Pipe) Width (in mm)');
+  if (!hasGap) missingInputs.push('3. Internal Gap Needed (in inches)');
+
+  // If any input is missing, show specific helpful messages for each missing input
+  if (missingInputs.length > 0) {
     return (
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-        Enter frame width to preview schematic.
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-base">
+              Interactive 2D Frame &amp; Rod Visualizer
+            </h3>
+            <p className="text-xs text-slate-400">
+              Please enter the required dimensions above to preview the schematic.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2.5 bg-slate-950/80 border border-slate-800/80 rounded-xl p-4">
+          <span className="text-xs font-semibold text-slate-300 block mb-1">
+            Missing input{missingInputs.length > 1 ? 's' : ''} to generate layout:
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div className={`p-3 rounded-lg border transition-all ${!hasFrame ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-900/50 border-slate-800 text-emerald-400'}`}>
+              <div className="font-semibold">{hasFrame ? '✓ Frame Width' : '❌ Enter Frame Width'}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">{hasFrame ? `${result.frameTotalInches} in (${result.frameTotalMm} mm)` : 'Inches & Soot'}</div>
+            </div>
+
+            <div className={`p-3 rounded-lg border transition-all ${!hasRod ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300' : 'bg-slate-900/50 border-slate-800 text-emerald-400'}`}>
+              <div className="font-semibold">{hasRod ? '✓ Filler (Rod/Pipe)' : '❌ Enter Filler Width'}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">{hasRod ? `${result.rodMm} mm` : 'Unit in mm'}</div>
+            </div>
+
+            <div className={`p-3 rounded-lg border transition-all ${!hasGap ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-900/50 border-slate-800 text-emerald-400'}`}>
+              <div className="font-semibold">{hasGap ? '✓ Target Gap' : '❌ Enter Target Gap'}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">{hasGap ? `${inputState.gapNeededInches} in` : 'Unit in inches'}</div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
